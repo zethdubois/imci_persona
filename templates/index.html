@@ -661,7 +661,7 @@
                                 <label for="tags">Tags (comma-separated)</label>
                                 <textarea id="tags" class="tags-input" placeholder="Enter tags separated by commas (e.g., developer, creative, leader)" oninput="updatePreview()"></textarea>
                             </div>
-                            <button class="btn" onclick="startSurvey()">Start Survey</button>
+                            <button class="btn" onclick="createNewProfile()">Regenerate Survey</button>
                         </div>
 
                         <div id="survey-section" class="hidden">
@@ -767,6 +767,7 @@
         let interestsData = [];
         let currentProfileImage = null;
         let currentTags = [];
+        let nameCheckTimer = null;
 
         function showMessage(message, type = 'info') {
             const messageArea = document.getElementById('message-area');
@@ -823,6 +824,9 @@
                     avatar.textContent = '👤';
                 }
             }
+
+            // Schedule a check for existing profiles for this name (debounced)
+            scheduleCheckName();
         }
 
         function handleImageUpload(event) {
@@ -854,6 +858,8 @@
         }
 
         async function startSurvey() {
+            // Deprecated: the flow now starts when the New Collaborator tab is opened.
+            // Keep function for backward compatibility if needed: it will still check for existing profiles.
             const nameInput = document.getElementById('name');
             currentName = nameInput.value.trim();
             
@@ -879,7 +885,7 @@
                     createRatingForm();
                 }
 
-                document.getElementById('name-section').classList.add('hidden');
+                // Do not hide the name input by default any more; allow editing while the survey is active
                 document.getElementById('survey-section').classList.remove('hidden');
 
             } catch (error) {
@@ -915,6 +921,9 @@
             });
             // Render initial radar with placeholders (zeros) so all axes are visible
             updateLiveRadar();
+
+            // Ensure survey panel is visible (for the always-on experience)
+            document.getElementById('survey-section').classList.remove('hidden');
         }
 
         function setRating(type, animal, rating, button) {
@@ -1062,6 +1071,9 @@
                     updateLiveRadar();
                     
                     document.getElementById('existing-profile-choice').classList.add('hidden');
+                    // Ensure the UI stays in the New Collaborator editing state
+                    document.getElementById('name-section').classList.remove('hidden');
+                    document.getElementById('survey-section').classList.remove('hidden');
                     showMessage(`Loaded existing profile for ${currentName}`, 'success');
                 } else {
                     showMessage('Profile not found', 'error');
@@ -1079,6 +1091,10 @@
             document.getElementById('existing-profile-choice').classList.add('hidden');
             document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
             createRatingForm();
+            // Show survey and name inputs together so everything is available instantly
+            document.getElementById('name-section').classList.remove('hidden');
+            document.getElementById('survey-section').classList.remove('hidden');
+            updatePreview();
         }
 
         function get_random_animals(count) {
@@ -1100,9 +1116,22 @@
             if (tabName === 'collaborators') {
                 loadCollaborators();
             }
+
+            // When switching to New Collaborator, clear the preview and show the live editor with survey
+            if (tabName === 'new-collaborator') {
+                // Reset survey state and preview to blank
+                resetSurvey();
+                // Ensure the preview is visible and project detail hidden
+                document.getElementById('project-detail').classList.add('hidden');
+                document.getElementById('profile-preview').classList.remove('hidden');
+                // Immediately generate a new survey so name, tags, and rating controls are available instantly
+                createNewProfile();
+            }
         }
 
         async function loadCollaborators() {
+            // If the user is currently on New Collaborator tab, leave the preview as the live editor.
+            // Otherwise, if we're on the Collaborators tab, keep behavior as-is.
             try {
                 const response = await fetch('/get_collaborators');
                 const data = await response.json();
@@ -1234,7 +1263,8 @@
             document.getElementById('name').value = '';
             document.getElementById('tags').value = '';
             document.getElementById('name-section').classList.remove('hidden');
-            document.getElementById('survey-section').classList.add('hidden');
+            // Keep survey-section visible so controls are immediately available (but cleared)
+            document.getElementById('survey-section').classList.remove('hidden');
             document.getElementById('existing-profile-choice').classList.add('hidden');
             document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
             
@@ -1329,6 +1359,8 @@
         }
 
         async function generateProjectTeam(count = 1) {
+            // Safety: ensure count is a positive integer
+            count = Math.max(1, Math.floor(count));
             const container = document.getElementById('project-team-container');
             container.innerHTML = '';
             
@@ -1385,8 +1417,40 @@
             skillsData = [];
             interestsData = [];
             console.log('Initializing live radar with animals:', currentAnimals);
-            updateLiveRadar();
+            // Show the New Collaborator UI immediately (name, tags, and survey controls available)
+            // but keep it blank until the user types a name or interacts with the ratings
+            document.querySelector('.tab-button').classList.add('active');
+            document.getElementById('new-collaborator').classList.add('active');
+            createNewProfile();
         });
+
+        // Debounced check for existing profile when user types a name
+        function scheduleCheckName() {
+            const name = document.getElementById('name').value.trim();
+            clearTimeout(nameCheckTimer);
+            if (!name) {
+                document.getElementById('existing-profile-choice').classList.add('hidden');
+                return;
+            }
+            nameCheckTimer = setTimeout(async () => {
+                try {
+                    const response = await fetch('/start_survey', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({name: name})
+                    });
+                    const data = await response.json();
+                    if (data.has_existing) {
+                        showMessage(data.message, 'info');
+                        document.getElementById('existing-profile-choice').classList.remove('hidden');
+                    } else {
+                        document.getElementById('existing-profile-choice').classList.add('hidden');
+                    }
+                } catch (err) {
+                    console.error('Error checking name:', err);
+                }
+            }, 600);
+        }
     </script>
 </body>
 </html>
