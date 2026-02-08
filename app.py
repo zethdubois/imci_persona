@@ -37,7 +37,12 @@ def get_profile_image_filename(name):
 def save_profile_to_file(name, skills_data, interests_data, image_data=None, tags=None):
     """Save profile to JSON file in data directory"""
     filename = get_profile_filename(name)
-    profile_data = {"name": name, "skills": skills_data, "interests": interests_data, "tags": tags or []}
+    profile_data = {
+        "name": name,
+        "skills": skills_data,
+        "interests": interests_data,
+        "tags": tags or [],
+    }
     with open(filename, "w") as f:
         json.dump(profile_data, f, indent=2)
 
@@ -114,13 +119,13 @@ def get_random_animals(count):
 
 def create_radar_chart(skills_data, interests_data, name):
     try:
-        # Create figure with polar subplot (doubled size)
-        fig, ax = plt.subplots(figsize=(20, 20), subplot_kw=dict(projection="polar"))
+        # Use a compact square figure and polar axis so the output image is perfectly square
+        fig, ax = plt.subplots(figsize=(6, 6), subplot_kw=dict(projection="polar"))
 
         # Number of variables
         categories = [item["animal"] for item in skills_data]
         N = len(categories)
-        
+
         if N == 0:
             raise ValueError("No categories found in skills data")
 
@@ -133,57 +138,60 @@ def create_radar_chart(skills_data, interests_data, name):
         skill_values += skill_values[:1]  # Complete the loop
 
         # Interest values (1-3 scale, map to 1-5 for display)
-        interest_values = [
-            item["interest"] * (5 / 3) for item in interests_data
-        ]  # Map 1-3 to ~1.7-5
+        interest_values = [item["interest"] * (5 / 3) for item in interests_data]
         interest_values += interest_values[:1]  # Complete the loop
 
-        # Plot skills (red)
+        # Plot skills and interests
         ax.plot(
-            angles, skill_values, "o-", linewidth=3, color="red", alpha=0.7, label="Skills"
+            angles,
+            skill_values,
+            "o-",
+            linewidth=2.5,
+            color="red",
+            alpha=0.8,
+            label="Skills",
         )
         ax.fill(angles, skill_values, alpha=0.25, color="red")
 
-        # Plot interests (dashed green line)
         ax.plot(
             angles,
             interest_values,
             "s--",
-            linewidth=6,
+            linewidth=2.5,
             color="green",
-            alpha=0.7,
+            alpha=0.8,
             label="Interests",
         )
         ax.fill(angles, interest_values, alpha=0.0, color="green")
 
-        # Add labels
+        # Labels and ticks
         ax.set_xticks(angles[:-1])
-        ax.set_xticklabels(categories, fontsize=24)
+        ax.set_xticklabels(categories, fontsize=12)
 
-        # Set y-axis limits
         ax.set_ylim(0, 5)
         ax.set_yticks([1, 2, 3, 4, 5])
-        ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=20)
+        ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=10)
 
-        # Add grid
+        # Grid
         ax.grid(True, alpha=0.3)
 
-        # Add legend
-        ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=24)
+        # Force square plotting area (if available) and tighten margins evenly
+        try:
+            ax.set_box_aspect(1)
+        except Exception:
+            pass
 
-        # Title
-        plt.title(
-            f"Skills vs Interests Radar Chart",
-            size=32,
-            weight="bold",
-            pad=40,
-        )
+        fig.subplots_adjust(left=0.06, right=0.94, top=0.92, bottom=0.08)
 
-        plt.tight_layout()
+        # Keep the legend inside the axes to avoid expanding the saved image horizontally
+        ax.legend(loc="upper right", fontsize=10)
 
-        # Convert to base64 string for web display
+        # Modest title so it does not add excessive vertical padding
+        # plt.title("Skills vs Interests Radar Chart", size=14, weight="bold", y=1.02)
+
+        # Save without 'tight' bbox so the figure remains the square size we requested
         img_buffer = io.BytesIO()
-        plt.savefig(img_buffer, format="png", dpi=300, bbox_inches="tight")
+        plt.savefig(img_buffer, format="png", dpi=300)
         img_buffer.seek(0)
         img_str = base64.b64encode(img_buffer.read()).decode()
         plt.close()
@@ -238,7 +246,9 @@ def submit_survey():
 
     # Save profile to file (with image if provided)
     tags_data = data.get("tags", [])
-    filename = save_profile_to_file(name, skills_data, interests_data, image_data, tags_data)
+    filename = save_profile_to_file(
+        name, skills_data, interests_data, image_data, tags_data
+    )
 
     # Create radar chart
     chart_data = create_radar_chart(skills_data, interests_data, name)
@@ -263,10 +273,18 @@ def generate_chart():
             return jsonify({"error": "Missing data"}), 400
 
         # Additional validation
-        if not all(isinstance(skill, dict) and "animal" in skill and "skill" in skill for skill in skills_data):
+        if not all(
+            isinstance(skill, dict) and "animal" in skill and "skill" in skill
+            for skill in skills_data
+        ):
             return jsonify({"error": "Invalid skills data format"}), 400
-            
-        if not all(isinstance(interest, dict) and "animal" in interest and "interest" in interest for interest in interests_data):
+
+        if not all(
+            isinstance(interest, dict)
+            and "animal" in interest
+            and "interest" in interest
+            for interest in interests_data
+        ):
             return jsonify({"error": "Invalid interests data format"}), 400
 
         # Create radar chart
@@ -302,6 +320,7 @@ def load_profile():
             "chart_data": chart_data,
             "skills": data["skills"],
             "interests": data["interests"],
+            "tags": data.get("tags", []),
             "image_data": data.get("image_data", None),
         }
     )

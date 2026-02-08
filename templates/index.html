@@ -343,9 +343,40 @@
         .profile-name {
             font-size: 2.5em;
             font-weight: bold;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             text-align: left;
+        }
+
+        /* Layout for profile header: image on left, name+tags on right */
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .profile-info {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            flex: 1;
+        }
+
+        .profile-tags {
+            margin-top: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .profile-header {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .profile-info {
+                align-items: center;
+            }
         }
         
         .radar-container {
@@ -657,17 +688,20 @@
         <!-- Preview Panel (Right) -->
         <div class="preview-panel">
             <div class="profile-preview" id="profile-preview">
-                <div class="profile-image" id="profile-image" onclick="document.getElementById('image-upload').click()">
-                    <span id="profile-avatar">👤</span>
-                    <div class="profile-image-overlay">
-                        <div class="image-upload-text">Click to upload image</div>
+                <div class="profile-header">
+                    <div class="profile-image" id="profile-image" onclick="document.getElementById('image-upload').click()">
+                        <span id="profile-avatar">👤</span>
+                        <div class="profile-image-overlay">
+                            <div class="image-upload-text">Click to upload image</div>
+                        </div>
                     </div>
-                </div>
-                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
-                <div class="profile-name" id="profile-name">Your Name</div>
-                
-                <div class="profile-tags">
-                    <div class="tags-container" id="profile-tags-container"></div>
+                    <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+                    <div class="profile-info">
+                        <div class="profile-name" id="profile-name">Your Name</div>
+                        <div class="profile-tags">
+                            <div class="tags-container" id="profile-tags-container"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="radar-container">
@@ -976,6 +1010,8 @@
                     interestsData = data.interests;
                     currentTags = data.tags || [];
                     document.getElementById('tags').value = currentTags.join(', ');
+                    // Update tag preview
+                    updatePreview();
                     
                     // Update UI with loaded data
                     currentAnimals = skillsData.map(item => item.animal);
@@ -1090,11 +1126,7 @@
                 const data = await response.json();
 
                 if (data.success) {
-                    // Switch to new collaborator tab
-                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
-                    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
-                    document.querySelector('.tab-button').classList.add('active');
-                    document.getElementById('new-collaborator').classList.add('active');
+                    // Do not force a tab switch here — keep the current tab active
                     
                     // Load the profile
                     currentName = name;
@@ -1104,6 +1136,8 @@
                     // Load tags
                     currentTags = data.tags || [];
                     document.getElementById('tags').value = currentTags.join(', ');
+                    // Ensure the tags display (and name/avatar) are updated
+                    updatePreview();
                     
                     // Load image if available
                     const profileImage = document.getElementById('profile-image');

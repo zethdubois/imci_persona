@@ -43,5 +43,18 @@
       "animal": "Giraffe",
       "interest": 3
     }
+  ],
+  "tags": [
+    "particles",
+    "waves",
+    "quantum",
+    "relativity",
+    "cosmology",
+    "astrophysics",
+    "nuclear physics",
+    "condensed matter",
+    "statistical mechanics",
+    "biophysics",
+    "computational physics"
   ]
 }

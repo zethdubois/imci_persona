@@ -43,5 +43,6 @@
       "animal": "Elephant",
       "interest": 3
     }
-  ]
+  ],
+  "tags": ["boo"]
 }
