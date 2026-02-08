@@ -282,6 +282,7 @@ def load_profile():
             "chart_data": chart_data,
             "skills": data["skills"],
             "interests": data["interests"],
+            "image_data": data.get("image_data", None),
         }
     )
 

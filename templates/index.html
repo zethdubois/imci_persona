@@ -180,6 +180,7 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+            position: relative;
         }
         
         h1 {
@@ -407,6 +408,34 @@
             border-radius: 10px;
             margin-bottom: 20px;
         }
+        
+        .project-detail {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+        
+        .project-detail-content {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 40px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .project-detail-title {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .project-detail-tagline {
+            font-size: 1.2em;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.9);
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -459,15 +488,20 @@
                             <!-- Collaborator cards will be loaded here -->
                         </div>
                     </div>
-                    
+
                     <!-- Projects Tab -->
                     <div id="projects" class="tab-panel">
                         <h1>📁 Projects</h1>
                         <p>Manage team projects</p>
                         <div class="projects-list">
-                            <div class="project-card">
-                                <div class="project-title">Sample Project</div>
-                                <div class="project-description">This is a sample project for demonstration purposes.</div>
+                            <div class="project-card" onclick="showProjectDetail('Eidolon', 'Cartographies of the Eidolon\nSimulating Cultural Doubles: Time-Space Configurations and the Computational Resurrection of Narrative Worlds')">
+                                <div class="project-title">Eidolon</div>
+                                <div class="project-description">Cartographies of the Eidolon</div>
+                                <div class="project-collaborators">Team members: Click on Collaborators tab to view</div>
+                            </div>
+                            <div class="project-card" onclick="showProjectDetail('Chronotopes', 'Bakhtin\'s Chronotopes\nForging Digital Specters: Modeling the Interwoven Temporalities and Spatialities of Cultural Imagination')">
+                                <div class="project-title">Chronotopes</div>
+                                <div class="project-description">Bakhtin's Chronotopes</div>
                                 <div class="project-collaborators">Team members: Click on Collaborators tab to view</div>
                             </div>
                         </div>
@@ -478,7 +512,7 @@
 
         <!-- Preview Panel (Right) -->
         <div class="preview-panel">
-            <div class="profile-preview">
+            <div class="profile-preview" id="profile-preview">
                 <div class="profile-image" id="profile-image" onclick="document.getElementById('image-upload').click()">
                     <span id="profile-avatar">👤</span>
                     <div class="profile-image-overlay">
@@ -487,11 +521,18 @@
                 </div>
                 <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 <div class="profile-name" id="profile-name">Your Name</div>
-                
+
                 <div class="radar-container">
                     <div id="radar-display" class="placeholder-radar">
                         Complete the survey to see your radar chart
                     </div>
+                </div>
+            </div>
+
+            <div class="project-detail hidden" id="project-detail">
+                <div class="project-detail-content">
+                    <h2 class="project-detail-title" id="project-detail-title"></h2>
+                    <div class="project-detail-tagline" id="project-detail-tagline"></div>
                 </div>
             </div>
         </div>
@@ -520,12 +561,24 @@
             document.getElementById('profile-name').textContent = name || 'Your Name';
             
             // Update avatar with first letter or emoji (only if no image is uploaded)
-            const avatar = document.getElementById('profile-avatar');
             const profileImage = document.getElementById('profile-image');
-            if (!profileImage.querySelector('img') && name) {
-                avatar.textContent = name.charAt(0).toUpperCase();
-            } else if (!profileImage.querySelector('img')) {
-                avatar.textContent = '👤';
+            const hasImage = profileImage.querySelector('img');
+            
+            if (!hasImage) {
+                // Find the avatar span (it might not exist if image was previously loaded)
+                let avatar = profileImage.querySelector('#profile-avatar');
+                if (!avatar) {
+                    // Create avatar span if it doesn't exist
+                    avatar = document.createElement('span');
+                    avatar.id = 'profile-avatar';
+                    profileImage.insertBefore(avatar, profileImage.firstChild);
+                }
+                
+                if (name) {
+                    avatar.textContent = name.charAt(0).toUpperCase();
+                } else {
+                    avatar.textContent = '👤';
+                }
             }
         }
 
@@ -681,15 +734,18 @@
             }
 
             try {
+                const profileData = {
+                    name: currentName,
+                    skills: skillsData,
+                    interests: interestsData,
+                    image_data: currentProfileImage
+                };
+                console.log('Saving profile with image data:', currentProfileImage ? currentProfileImage.substring(0, 50) + '...' : 'null');
+                
                 const response = await fetch('/submit_survey', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({
-                        name: currentName,
-                        skills: skillsData,
-                        interests: interestsData,
-                        image_data: currentProfileImage
-                    })
+                    body: JSON.stringify(profileData)
                 });
 
                 const data = await response.json();
@@ -845,12 +901,14 @@
                     
                     // Load image if available
                     const profileImage = document.getElementById('profile-image');
-                    if (data.image_data) {
+                    if (data.image_data && data.image_data !== 'null' && data.image_data !== '') {
                         currentProfileImage = data.image_data;
                         profileImage.innerHTML = `<img src="${data.image_data}" alt="Profile"><div class="profile-image-overlay"><div class="image-upload-text">Click to change image</div></div>`;
+                        console.log('Loaded image for', name, ':', data.image_data.substring(0, 50) + '...');
                     } else {
                         currentProfileImage = null;
                         profileImage.innerHTML = '<span id="profile-avatar">' + name.charAt(0).toUpperCase() + '</span><div class="profile-image-overlay"><div class="image-upload-text">Click to upload image</div></div>';
+                        console.log('No image data found for', name);
                     }
                     
                     // Update UI
@@ -874,9 +932,16 @@
                         if (interestBtn) interestBtn.classList.add('selected');
                     });
                     
-                    // Update preview
-                    updatePreview();
+                    // Update preview (but don't override image)
+                    const nameInput = document.getElementById('name');
+                    nameInput.value = name;
+                    document.getElementById('profile-name').textContent = name;
+                    
                     updateLiveRadar();
+                    
+                    // Ensure profile preview is visible
+                    document.getElementById('project-detail').classList.add('hidden');
+                    document.getElementById('profile-preview').classList.remove('hidden');
                     
                     showMessage(`Loaded profile for ${name}`, 'success');
                 } else {
@@ -906,6 +971,22 @@
             profileImage.innerHTML = '<span id="profile-avatar">👤</span><div class="profile-image-overlay"><div class="image-upload-text">Click to upload image</div></div>';
             
             updatePreview();
+        }
+
+        function showProjectDetail(title, tagline) {
+            // Hide profile preview and show project detail
+            document.getElementById('profile-preview').classList.add('hidden');
+            document.getElementById('project-detail').classList.remove('hidden');
+            
+            // Update project detail content
+            document.getElementById('project-detail-title').textContent = title;
+            document.getElementById('project-detail-tagline').innerHTML = tagline.replace(/\n/g, '<br>');
+        }
+
+        function showProfilePreview() {
+            // Hide project detail and show profile preview
+            document.getElementById('project-detail').classList.add('hidden');
+            document.getElementById('profile-preview').classList.remove('hidden');
         }
     </script>
 </body>
