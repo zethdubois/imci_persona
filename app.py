@@ -17,8 +17,8 @@ os.makedirs(DATA_DIR, exist_ok=True)
 
 def get_safe_name(name):
     """Generate a safe filename base from the name"""
-    safe_name = "".join(c for c in name if c.isalnum() or c in (' ', '-', '_')).rstrip()
-    safe_name = safe_name.replace(' ', '_').lower()
+    safe_name = "".join(c for c in name if c.isalnum() or c in (" ", "-", "_")).rstrip()
+    safe_name = safe_name.replace(" ", "_").lower()
     return safe_name
 
 
@@ -37,28 +37,24 @@ def get_profile_image_filename(name):
 def save_profile_to_file(name, skills_data, interests_data, image_data=None):
     """Save profile to JSON file in data directory"""
     filename = get_profile_filename(name)
-    profile_data = {
-        "name": name,
-        "skills": skills_data,
-        "interests": interests_data
-    }
-    with open(filename, 'w') as f:
+    profile_data = {"name": name, "skills": skills_data, "interests": interests_data}
+    with open(filename, "w") as f:
         json.dump(profile_data, f, indent=2)
-    
+
     # Save image if provided
     if image_data:
         image_filename = get_profile_image_filename(name)
         # Decode base64 image data
         try:
             # Remove data URL prefix if present
-            if ',' in image_data:
-                image_data = image_data.split(',')[1]
+            if "," in image_data:
+                image_data = image_data.split(",")[1]
             image_bytes = base64.b64decode(image_data)
-            with open(image_filename, 'wb') as f:
+            with open(image_filename, "wb") as f:
                 f.write(image_bytes)
         except Exception as e:
             print(f"Error saving image: {e}")
-    
+
     return filename
 
 
@@ -66,14 +62,14 @@ def load_profile_from_file(name):
     """Load profile from JSON file"""
     filename = get_profile_filename(name)
     if os.path.exists(filename):
-        with open(filename, 'r') as f:
+        with open(filename, "r") as f:
             data = json.load(f)
             # Check if there's an associated image
             image_filename = get_profile_image_filename(name)
             if os.path.exists(image_filename):
-                with open(image_filename, 'rb') as img_f:
-                    image_data = base64.b64encode(img_f.read()).decode('utf-8')
-                    data['image_data'] = f"data:image/png;base64,{image_data}"
+                with open(image_filename, "rb") as img_f:
+                    image_data = base64.b64encode(img_f.read()).decode("utf-8")
+                    data["image_data"] = f"data:image/png;base64,{image_data}"
             return data
     return None
 
@@ -82,18 +78,18 @@ def get_all_profiles():
     """Get all profiles from data directory"""
     profiles = []
     for filename in os.listdir(DATA_DIR):
-        if filename.endswith('_persona.json'):
+        if filename.endswith("_persona.json"):
             filepath = os.path.join(DATA_DIR, filename)
             try:
-                with open(filepath, 'r') as f:
+                with open(filepath, "r") as f:
                     data = json.load(f)
                     # Check if there's an associated image
-                    name = data.get('name', '')
+                    name = data.get("name", "")
                     image_filename = get_profile_image_filename(name)
                     if os.path.exists(image_filename):
-                        with open(image_filename, 'rb') as img_f:
-                            image_data = base64.b64encode(img_f.read()).decode('utf-8')
-                            data['image_data'] = f"data:image/png;base64,{image_data}"
+                        with open(image_filename, "rb") as img_f:
+                            image_data = base64.b64encode(img_f.read()).decode("utf-8")
+                            data["image_data"] = f"data:image/png;base64,{image_data}"
                     profiles.append(data)
             except (json.JSONDecodeError, IOError):
                 continue
@@ -149,12 +145,12 @@ def create_radar_chart(skills_data, interests_data, name):
         angles,
         interest_values,
         "s--",
-        linewidth=3,
+        linewidth=6,
         color="green",
         alpha=0.7,
         label="Interests",
     )
-    ax.fill(angles, interest_values, alpha=0.15, color="green")
+    ax.fill(angles, interest_values, alpha=0.0, color="green")
 
     # Add labels
     ax.set_xticks(angles[:-1])
@@ -211,7 +207,7 @@ def start_survey():
                 "message": f"Found existing profile for {name}!",
                 "existing_data": {
                     "skills": existing_profile["skills"],
-                    "interests": existing_profile["interests"]
+                    "interests": existing_profile["interests"],
                 },
             }
         )
@@ -227,12 +223,13 @@ def submit_survey():
     name = data.get("name", "").strip()
     skills_data = data.get("skills", [])
     interests_data = data.get("interests", [])
+    image_data = data.get("image_data", None)
 
     if not name or not skills_data or not interests_data:
         return jsonify({"error": "Missing required data"}), 400
 
-    # Save profile to file
-    filename = save_profile_to_file(name, skills_data, interests_data)
+    # Save profile to file (with image if provided)
+    filename = save_profile_to_file(name, skills_data, interests_data, image_data)
 
     # Create radar chart
     chart_data = create_radar_chart(skills_data, interests_data, name)
@@ -242,7 +239,7 @@ def submit_survey():
             "success": True,
             "chart_data": chart_data,
             "message": f"Profile saved for {name}!",
-            "filename": filename
+            "filename": filename,
         }
     )
 
@@ -265,16 +262,13 @@ def generate_chart():
 def get_collaborators():
     """Get all collaborators from data directory"""
     profiles = get_all_profiles()
-    return jsonify({
-        "success": True,
-        "collaborators": profiles
-    })
+    return jsonify({"success": True, "collaborators": profiles})
 
 
 @app.route("/load_profile", methods=["POST"])
 def load_profile():
     name = request.json.get("name", "").strip()
-    
+
     # Load from file
     data = load_profile_from_file(name)
     if not data:

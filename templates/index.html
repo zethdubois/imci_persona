@@ -502,6 +502,7 @@
         let currentAnimals = [];
         let skillsData = [];
         let interestsData = [];
+        let currentProfileImage = null;
 
         function showMessage(message, type = 'info') {
             const messageArea = document.getElementById('message-area');
@@ -534,7 +535,9 @@
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     const profileImage = document.getElementById('profile-image');
-                    const avatar = document.getElementById('profile-avatar');
+                    
+                    // Store the image data
+                    currentProfileImage = e.target.result;
                     
                     // Create image element
                     const img = document.createElement('img');
@@ -684,7 +687,8 @@
                     body: JSON.stringify({
                         name: currentName,
                         skills: skillsData,
-                        interests: interestsData
+                        interests: interestsData,
+                        image_data: currentProfileImage
                     })
                 });
 
@@ -790,9 +794,17 @@
                         
                         const animals = collaborator.skills.map(s => s.animal).join(', ');
                         
+                        // Use image if available, otherwise show initial
+                        let avatarContent;
+                        if (collaborator.image_data) {
+                            avatarContent = `<img src="${collaborator.image_data}" alt="${collaborator.name}">`;
+                        } else {
+                            avatarContent = `<span>${collaborator.name.charAt(0).toUpperCase()}</span>`;
+                        }
+                        
                         card.innerHTML = `
                             <div class="collaborator-avatar">
-                                <span>${collaborator.name.charAt(0).toUpperCase()}</span>
+                                ${avatarContent}
                             </div>
                             <div class="collaborator-name">${collaborator.name}</div>
                             <div class="collaborator-animals">${animals}</div>
@@ -830,6 +842,16 @@
                     currentName = name;
                     skillsData = data.skills;
                     interestsData = data.interests;
+                    
+                    // Load image if available
+                    const profileImage = document.getElementById('profile-image');
+                    if (data.image_data) {
+                        currentProfileImage = data.image_data;
+                        profileImage.innerHTML = `<img src="${data.image_data}" alt="Profile"><div class="profile-image-overlay"><div class="image-upload-text">Click to change image</div></div>`;
+                    } else {
+                        currentProfileImage = null;
+                        profileImage.innerHTML = '<span id="profile-avatar">' + name.charAt(0).toUpperCase() + '</span><div class="profile-image-overlay"><div class="image-upload-text">Click to upload image</div></div>';
+                    }
                     
                     // Update UI
                     document.getElementById('name').value = name;
@@ -871,6 +893,7 @@
             currentAnimals = [];
             skillsData = [];
             interestsData = [];
+            currentProfileImage = null;
             
             document.getElementById('name').value = '';
             document.getElementById('name-section').classList.remove('hidden');

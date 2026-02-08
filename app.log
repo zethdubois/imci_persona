@@ -674,3 +674,8 @@ ValueError: x and y must have same first dimension, but have shapes (6,) and (5,
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 978-332-191
+ * Detected change in '/home/golem/projects/imci_persona/app.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 978-332-191
+127.0.0.1 - - [08/Feb/2026 00:38:38] "GET /get_collaborators HTTP/1.1" 200 -
