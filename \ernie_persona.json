@@ -1,0 +1,47 @@
+{
+  "name": "\\ernie",
+  "skills": [
+    {
+      "Animal": "Wolf",
+      "Skill": 3
+    },
+    {
+      "Animal": "Owl",
+      "Skill": 5
+    },
+    {
+      "Animal": "Eagle",
+      "Skill": 2
+    },
+    {
+      "Animal": "Elephant",
+      "Skill": 3
+    },
+    {
+      "Animal": "Penguin",
+      "Skill": 5
+    }
+  ],
+  "interests": [
+    {
+      "Animal": "Wolf",
+      "Interest": 1
+    },
+    {
+      "Animal": "Owl",
+      "Interest": 5
+    },
+    {
+      "Animal": "Eagle",
+      "Interest": 4
+    },
+    {
+      "Animal": "Elephant",
+      "Interest": 3
+    },
+    {
+      "Animal": "Penguin",
+      "Interest": 5
+    }
+  ]
+}

@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Persona Profile Survey</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+        }
+        
+        .config-panel {
+            width: 400px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 30px;
+            overflow-y: auto;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .preview-panel {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(5px);
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        h1 {
+            font-size: 2em;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        input[type="text"]::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .rating-group {
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+        
+        .rating-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            display: block;
+            font-size: 1.1em;
+        }
+        
+        .rating-buttons {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        
+        .rating-btn {
+            flex: 1;
+            padding: 8px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        
+        .rating-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .rating-btn.selected {
+            background: rgba(255, 255, 255, 0.4);
+            border-color: white;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        }
+        
+        .btn {
+            background: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #2196F3;
+        }
+        
+        .btn-secondary:hover {
+            background: #1976D2;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .profile-preview {
+            text-align: left;
+            max-width: 500px;
+            width: 100%;
+        }
+        
+        .profile-image {
+            width: 200px;
+            height: 200px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+        
+        .profile-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 20px;
+        }
+        
+        .profile-image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 20px;
+        }
+        
+        .profile-image:hover .profile-image-overlay {
+            opacity: 1;
+        }
+        
+        .image-upload-text {
+            color: white;
+            font-size: 14px;
+            text-align: center;
+        }
+        
+        .profile-name {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 30px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .radar-container {
+            width: 800px;
+            height: 800px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+        }
+        
+        .radar-container img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+        }
+        
+        .placeholder-radar {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2em;
+            color: rgba(255, 255, 255, 0.6);
+            border: 2px dashed rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+        
+        .success {
+            background: rgba(76, 175, 80, 0.2);
+            border: 1px solid #4CAF50;
+        }
+        
+        .error {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid #f44336;
+        }
+        
+        .info {
+            background: rgba(33, 150, 243, 0.2);
+            border: 1px solid #2196F3;
+        }
+        
+        .action-buttons {
+            margin-top: 20px;
+        }
+        
+        .existing-profile-choice {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Config Panel (Left) -->
+        <div class="config-panel">
+            <h1>🎯 Config Panel</h1>
+            
+            <div id="name-section">
+                <div class="form-group">
+                    <label for="name">What is your name?</label>
+                    <input type="text" id="name" placeholder="Enter your name" oninput="updatePreview()">
+                </div>
+                <button class="btn" onclick="startSurvey()">Start Survey</button>
+            </div>
+
+            <div id="survey-section" class="hidden">
+                <div id="message-area"></div>
+                
+                <div id="existing-profile-choice" class="existing-profile-choice hidden">
+                    <p>Found existing profile! What would you like to do?</p>
+                    <button class="btn btn-secondary" onclick="loadExistingProfile()">View Existing Profile</button>
+                    <button class="btn" onclick="createNewProfile()">Create New Profile</button>
+                </div>
+
+                <div id="ratings-container"></div>
+                
+                <div class="action-buttons">
+                    <button class="btn" onclick="saveProfile()">Save Profile</button>
+                    <button class="btn btn-secondary" onclick="resetSurvey()">Reset</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Preview Panel (Right) -->
+        <div class="preview-panel">
+            <div class="profile-preview">
+                <div class="profile-image" id="profile-image">
+                    <span id="profile-avatar">👤</span>
+                </div>
+                <div class="profile-name" id="profile-name">Your Name</div>
+                
+                <div class="radar-container">
+                    <div id="radar-display" class="placeholder-radar">
+                        Complete the survey to see your radar chart
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentName = '';
+        let currentAnimals = [];
+        let skillsData = [];
+        let interestsData = [];
+
+        function showMessage(message, type = 'info') {
+            const messageArea = document.getElementById('message-area');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        function updatePreview() {
+            const nameInput = document.getElementById('name');
+            const name = nameInput.value.trim();
+            
+            // Update profile name
+            document.getElementById('profile-name').textContent = name || 'Your Name';
+            
+            // Update avatar with first letter or emoji
+            const avatar = document.getElementById('profile-avatar');
+            if (name) {
+                avatar.textContent = name.charAt(0).toUpperCase();
+            } else {
+                avatar.textContent = '👤';
+            }
+        }
+
+        async function startSurvey() {
+            const nameInput = document.getElementById('name');
+            currentName = nameInput.value.trim();
+            
+            if (!currentName) {
+                showMessage('Please enter your name', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/start_survey', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: currentName})
+                });
+
+                const data = await response.json();
+
+                if (data.has_existing) {
+                    showMessage(data.message, 'info');
+                    document.getElementById('existing-profile-choice').classList.remove('hidden');
+                } else {
+                    currentAnimals = data.animals;
+                    createRatingForm();
+                }
+
+                document.getElementById('name-section').classList.add('hidden');
+                document.getElementById('survey-section').classList.remove('hidden');
+
+            } catch (error) {
+                showMessage('Error starting survey', 'error');
+            }
+        }
+
+        function createRatingForm() {
+            const container = document.getElementById('ratings-container');
+            container.innerHTML = '';
+
+            currentAnimals.forEach(animal => {
+                const animalDiv = document.createElement('div');
+                animalDiv.className = 'rating-group';
+                animalDiv.innerHTML = `
+                    <div class="rating-label">${animal}</div>
+                    
+                    <div class="rating-label">Skill Level:</div>
+                    <div class="rating-buttons">
+                        ${[1,2,3,4,5].map(num => 
+                            `<button class="rating-btn" onclick="setRating('skill', '${animal}', ${num}, this)">${num}</button>`
+                        ).join('')}
+                    </div>
+                    
+                    <div class="rating-label">Interest Level:</div>
+                    <div class="rating-buttons">
+                        <button class="rating-btn" onclick="setRating('interest', '${animal}', 1, this)">Low</button>
+                        <button class="rating-btn" onclick="setRating('interest', '${animal}', 2, this)">Medium</button>
+                        <button class="rating-btn" onclick="setRating('interest', '${animal}', 3, this)">High</button>
+                    </div>
+                `;
+                container.appendChild(animalDiv);
+            });
+        }
+
+        function setRating(type, animal, rating, button) {
+            // Remove selected class from siblings
+            button.parentElement.querySelectorAll('.rating-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            button.classList.add('selected');
+
+            // Store data
+            if (type === 'skill') {
+                const existingIndex = skillsData.findIndex(item => item.animal === animal);
+                if (existingIndex >= 0) {
+                    skillsData[existingIndex].skill = rating;
+                } else {
+                    skillsData.push({animal, skill: rating});
+                }
+            } else {
+                const existingIndex = interestsData.findIndex(item => item.animal === animal);
+                if (existingIndex >= 0) {
+                    interestsData[existingIndex].interest = rating;
+                } else {
+                    interestsData.push({animal, interest: rating});
+                }
+            }
+
+            // Update live preview
+            updateLiveRadar();
+        }
+
+        async function updateLiveRadar() {
+            if (skillsData.length === 0 || interestsData.length === 0) {
+                return;
+            }
+
+            try {
+                const response = await fetch('/generate_chart', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        skills: skillsData,
+                        interests: interestsData
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    const radarDisplay = document.getElementById('radar-display');
+                    radarDisplay.innerHTML = `<img src="data:image/png;base64,${data.chart_data}" alt="Live Radar Chart">`;
+                }
+
+            } catch (error) {
+                console.error('Error updating radar:', error);
+            }
+        }
+
+        async function saveProfile() {
+            if (skillsData.length !== currentAnimals.length || interestsData.length !== currentAnimals.length) {
+                showMessage('Please rate all skills and interests', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/submit_survey', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: currentName,
+                        skills: skillsData,
+                        interests: interestsData
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    showMessage(data.message, 'success');
+                } else {
+                    showMessage('Error saving profile', 'error');
+                }
+
+            } catch (error) {
+                showMessage('Error saving profile', 'error');
+            }
+        }
+
+        async function loadExistingProfile() {
+            try {
+                const response = await fetch('/load_profile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: currentName})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    skillsData = data.skills;
+                    interestsData = data.interests;
+                    
+                    // Update UI with loaded data
+                    currentAnimals = skillsData.map(item => item.animal);
+                    createRatingForm();
+                    
+                    // Set button states
+                    skillsData.forEach(item => {
+                        const skillBtn = document.querySelector(`button[onclick*="skill"][onclick*="${item.animal}"][onclick*="${item.skill}"]`);
+                        if (skillBtn) skillBtn.classList.add('selected');
+                    });
+                    
+                    interestsData.forEach(item => {
+                        const interestBtn = document.querySelector(`button[onclick*="interest"][onclick*="${item.animal}"][onclick*="${item.interest}"]`);
+                        if (interestBtn) interestBtn.classList.add('selected');
+                    });
+                    
+                    // Update radar
+                    updateLiveRadar();
+                    
+                    document.getElementById('existing-profile-choice').classList.add('hidden');
+                    showMessage(`Loaded existing profile for ${currentName}`, 'success');
+                } else {
+                    showMessage('Profile not found', 'error');
+                }
+
+            } catch (error) {
+                showMessage('Error loading profile', 'error');
+            }
+        }
+
+        function createNewProfile() {
+            currentAnimals = get_random_animals(5);
+            skillsData = [];
+            interestsData = [];
+            document.getElementById('existing-profile-choice').classList.add('hidden');
+            document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
+            createRatingForm();
+        }
+
+        function get_random_animals(count) {
+            const animals = ['Lion', 'Eagle', 'Dolphin', 'Wolf', 'Elephant', 'Giraffe', 'Penguin', 'Bear', 'Fox', 'Owl'];
+            const shuffled = [...animals].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function resetSurvey() {
+            currentName = '';
+            currentAnimals = [];
+            skillsData = [];
+            interestsData = [];
+            
+            document.getElementById('name').value = '';
+            document.getElementById('name-section').classList.remove('hidden');
+            document.getElementById('survey-section').classList.add('hidden');
+            document.getElementById('existing-profile-choice').classList.add('hidden');
+            document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
+            
+            updatePreview();
+        }
+    </script>
+</body>
+</html>

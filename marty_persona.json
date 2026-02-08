@@ -1,0 +1,47 @@
+{
+  "name": "Marty",
+  "skills": [
+    {
+      "Animal": "Eagle",
+      "Skill": 5
+    },
+    {
+      "Animal": "Giraffe",
+      "Skill": 3
+    },
+    {
+      "Animal": "Penguin",
+      "Skill": 1
+    },
+    {
+      "Animal": "Owl",
+      "Skill": 4
+    },
+    {
+      "Animal": "Lion",
+      "Skill": 5
+    }
+  ],
+  "interests": [
+    {
+      "Animal": "Eagle",
+      "Interest": 5
+    },
+    {
+      "Animal": "Giraffe",
+      "Interest": 1
+    },
+    {
+      "Animal": "Penguin",
+      "Interest": 4
+    },
+    {
+      "Animal": "Owl",
+      "Interest": 1
+    },
+    {
+      "Animal": "Lion",
+      "Interest": 1
+    }
+  ]
+}
