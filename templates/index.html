@@ -436,6 +436,110 @@
             color: rgba(255, 255, 255, 0.9);
             font-style: italic;
         }
+        
+        .project-skills, .project-team {
+            margin-top: 40px;
+        }
+        
+        .project-skills h3, .project-team h3 {
+            font-size: 1.5em;
+            margin-bottom: 20px;
+            color: white;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+        
+        .skill-meter {
+            margin-bottom: 20px;
+        }
+        
+        .skill-name {
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.9);
+        }
+        
+        .skill-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .skill-segments {
+            display: flex;
+            height: 100%;
+        }
+        
+        .skill-segment {
+            flex: 1;
+            border-right: 1px solid rgba(0, 0, 0, 0.2);
+        }
+        
+        .skill-segment:last-child {
+            border-right: none;
+        }
+        
+        .skill-segment.filled {
+            background: linear-gradient(90deg, #4CAF50, #45a049);
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        
+        .skill-segment.empty {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .project-team-member {
+            display: flex;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+        }
+        
+        .project-team-member:hover {
+            background: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+        }
+        
+        .team-member-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            margin-right: 15px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            overflow: hidden;
+            flex-shrink: 0;
+        }
+        
+        .team-member-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .team-member-info {
+            flex: 1;
+        }
+        
+        .team-member-name {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+        
+        .team-member-skills {
+            font-size: 0.9em;
+            color: rgba(255, 255, 255, 0.7);
+        }
     </style>
 </head>
 <body>
@@ -533,6 +637,16 @@
                 <div class="project-detail-content">
                     <h2 class="project-detail-title" id="project-detail-title"></h2>
                     <div class="project-detail-tagline" id="project-detail-tagline"></div>
+                    
+                    <div class="project-skills">
+                        <h3>Required Skills</h3>
+                        <div id="project-skills-container"></div>
+                    </div>
+                    
+                    <div class="project-team">
+                        <h3>Project Team</h3>
+                        <div id="project-team-container"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -981,12 +1095,115 @@
             // Update project detail content
             document.getElementById('project-detail-title').textContent = title;
             document.getElementById('project-detail-tagline').innerHTML = tagline.replace(/\n/g, '<br>');
+            
+            // Generate and display random skills
+            generateProjectSkills();
+            
+            // Generate and display team members
+            generateProjectTeam();
         }
 
         function showProfilePreview() {
             // Hide project detail and show profile preview
             document.getElementById('project-detail').classList.add('hidden');
             document.getElementById('profile-preview').classList.remove('hidden');
+        }
+
+        function generateProjectSkills() {
+            const allAnimals = ['Lion', 'Eagle', 'Dolphin', 'Wolf', 'Elephant', 'Giraffe', 'Penguin', 'Bear', 'Fox', 'Owl'];
+            const selectedAnimals = [];
+            
+            // Pick 3 random animals
+            while (selectedAnimals.length < 3) {
+                const randomAnimal = allAnimals[Math.floor(Math.random() * allAnimals.length)];
+                if (!selectedAnimals.includes(randomAnimal)) {
+                    selectedAnimals.push(randomAnimal);
+                }
+            }
+            
+            // Generate random skill levels (1-5)
+            const skillsData = selectedAnimals.map(animal => ({
+                name: animal,
+                level: Math.floor(Math.random() * 5) + 1
+            }));
+            
+            // Display skill meters
+            const container = document.getElementById('project-skills-container');
+            container.innerHTML = '';
+            
+            skillsData.forEach(skill => {
+                const skillMeter = document.createElement('div');
+                skillMeter.className = 'skill-meter';
+                
+                const skillName = document.createElement('div');
+                skillName.className = 'skill-name';
+                skillName.textContent = skill.name;
+                
+                const skillBar = document.createElement('div');
+                skillBar.className = 'skill-bar';
+                
+                const segments = document.createElement('div');
+                segments.className = 'skill-segments';
+                
+                for (let i = 1; i <= 5; i++) {
+                    const segment = document.createElement('div');
+                    segment.className = 'skill-segment';
+                    segment.classList.add(i <= skill.level ? 'filled' : 'empty');
+                    segments.appendChild(segment);
+                }
+                
+                skillBar.appendChild(segments);
+                skillMeter.appendChild(skillName);
+                skillMeter.appendChild(skillBar);
+                container.appendChild(skillMeter);
+            });
+        }
+
+        async function generateProjectTeam() {
+            const container = document.getElementById('project-team-container');
+            container.innerHTML = '';
+            
+            try {
+                // Get all collaborators
+                const response = await fetch('/get_collaborators');
+                const data = await response.json();
+                
+                if (data.success && data.collaborators && data.collaborators.length > 0) {
+                    // Pick one random collaborator
+                    const randomIndex = Math.floor(Math.random() * data.collaborators.length);
+                    const teamMember = data.collaborators[randomIndex];
+                    
+                    const memberDiv = document.createElement('div');
+                    memberDiv.className = 'project-team-member';
+                    
+                    // Create avatar
+                    let avatarContent;
+                    if (teamMember.image_data) {
+                        avatarContent = `<img src="${teamMember.image_data}" alt="${teamMember.name}">`;
+                    } else {
+                        avatarContent = `<span>${teamMember.name.charAt(0).toUpperCase()}</span>`;
+                    }
+                    
+                    const animals = teamMember.skills.map(s => s.animal).join(', ');
+                    
+                    memberDiv.innerHTML = `
+                        <div class="team-member-avatar">
+                            ${avatarContent}
+                        </div>
+                        <div class="team-member-info">
+                            <div class="team-member-name">${teamMember.name}</div>
+                            <div class="team-member-skills">${animals}</div>
+                        </div>
+                    `;
+                    
+                    container.appendChild(memberDiv);
+                } else {
+                    container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">No team members available</p>';
+                }
+            } catch (error) {
+                console.error('Error loading team members:', error);
+                container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Error loading team members</p>';
+            }
         }
     </script>
 </body>

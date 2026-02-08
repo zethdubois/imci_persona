@@ -1,0 +1,47 @@
+{
+  "name": "Robin",
+  "skills": [
+    {
+      "animal": "Wolf",
+      "skill": 5
+    },
+    {
+      "animal": "Penguin",
+      "skill": 3
+    },
+    {
+      "animal": "Giraffe",
+      "skill": 2
+    },
+    {
+      "animal": "Lion",
+      "skill": 1
+    },
+    {
+      "animal": "Eagle",
+      "skill": 2
+    }
+  ],
+  "interests": [
+    {
+      "animal": "Wolf",
+      "interest": 2
+    },
+    {
+      "animal": "Penguin",
+      "interest": 1
+    },
+    {
+      "animal": "Giraffe",
+      "interest": 2
+    },
+    {
+      "animal": "Lion",
+      "interest": 1
+    },
+    {
+      "animal": "Eagle",
+      "interest": 1
+    }
+  ]
+}
