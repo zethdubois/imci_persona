@@ -44,5 +44,11 @@
       "interest": 1
     }
   ],
-  "tags": []
+  "tags": [
+    "cryptography",
+    "machine learning",
+    "data science",
+    "neural networks",
+    "number theory"
+  ]
 }

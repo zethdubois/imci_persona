@@ -15,7 +15,7 @@
     },
     {
       "animal": "Wolf",
-      "skill": 4
+      "skill": 5
     },
     {
       "animal": "Elephant",
@@ -44,5 +44,5 @@
       "interest": 3
     }
   ],
-  "tags": ["boo"]
+  "tags": ["beer", "dennett", "cats"]
 }

@@ -467,6 +467,33 @@
             color: rgba(255, 255, 255, 0.9);
             font-style: italic;
         }
+
+        /* Project status badges */
+        .project-status {
+            display: inline-block;
+            padding: 6px 10px;
+            border-radius: 12px;
+            font-weight: bold;
+            font-size: 0.9em;
+            margin-top: 6px;
+        }
+
+        .status-proposal { background: rgba(255, 193, 7, 0.15); color: #ffd54f; border: 1px solid rgba(255, 193, 7, 0.3); }
+        .status-funded { background: rgba(76, 175, 80, 0.12); color: #96c48a; border: 1px solid rgba(76, 175, 80, 0.2); }
+
+        .project-detail-status {
+            display: inline-block;
+            padding: 8px 12px;
+            border-radius: 14px;
+            font-weight: bold;
+            font-size: 1em;
+            margin-bottom: 12px;
+            color: white;
+            background: rgba(0,0,0,0.2);
+        }
+
+        .project-detail-status.status-proposal { background: rgba(255, 193, 7, 0.25); color: #3d2b00; }
+        .project-detail-status.status-funded { background: rgba(76, 175, 80, 0.25); color: #08310b; }
         
         .project-skills, .project-team {
             margin-top: 40px;
@@ -669,15 +696,17 @@
                         <h1>📁 Projects</h1>
                         <p>Manage team projects</p>
                         <div class="projects-list">
-                            <div class="project-card" onclick="showProjectDetail('Eidolon', 'Cartographies of the Eidolon\nSimulating Cultural Doubles: Time-Space Configurations and the Computational Resurrection of Narrative Worlds')">
+                            <div class="project-card" onclick="showProjectDetail('Eidolon', 'Cartographies of the Eidolon\nSimulating Cultural Doubles: Time-Space Configurations and the Computational Resurrection of Narrative Worlds', 'Proposal', 1)">
                                 <div class="project-title">Eidolon</div>
+                                <div class="project-status status-proposal">Proposal</div>
                                 <div class="project-description">Cartographies of the Eidolon</div>
-                                <div class="project-collaborators">Team members: Click on Collaborators tab to view</div>
+                                <div class="project-collaborators">Team: 1 member</div>
                             </div>
-                            <div class="project-card" onclick="showProjectDetail('Chronotopes', 'Bakhtin\'s Chronotopes\nForging Digital Specters: Modeling the Interwoven Temporalities and Spatialities of Cultural Imagination')">
+                            <div class="project-card" onclick="showProjectDetail('Chronotopes', 'Bakhtin\'s Chronotopes\nForging Digital Specters: Modeling the Interwoven Temporalities and Spatialities of Cultural Imagination', 'Funded', 3)">
                                 <div class="project-title">Chronotopes</div>
+                                <div class="project-status status-funded">Funded</div>
                                 <div class="project-description">Bakhtin's Chronotopes</div>
-                                <div class="project-collaborators">Team members: Click on Collaborators tab to view</div>
+                                <div class="project-collaborators">Team: 3 members</div>
                             </div>
                         </div>
                     </div>
@@ -714,6 +743,7 @@
             <div class="project-detail hidden" id="project-detail">
                 <div class="project-detail-content">
                     <h2 class="project-detail-title" id="project-detail-title"></h2>
+                    <div id="project-detail-status" class="project-detail-status"></div>
                     <div class="project-detail-tagline" id="project-detail-tagline"></div>
                     
                     <div class="project-skills">
@@ -1218,7 +1248,7 @@
             updatePreview();
         }
 
-        function showProjectDetail(title, tagline) {
+        function showProjectDetail(title, tagline, status = '', teamCount = 1) {
             // Hide profile preview and show project detail
             document.getElementById('profile-preview').classList.add('hidden');
             document.getElementById('project-detail').classList.remove('hidden');
@@ -1226,12 +1256,20 @@
             // Update project detail content
             document.getElementById('project-detail-title').textContent = title;
             document.getElementById('project-detail-tagline').innerHTML = tagline.replace(/\n/g, '<br>');
+
+            // Update status badge
+            const statusEl = document.getElementById('project-detail-status');
+            statusEl.textContent = status ? `${status} • Team: ${teamCount}` : '';
+            // Reset status classes
+            statusEl.classList.remove('status-proposal', 'status-funded');
+            if (status && status.toLowerCase() === 'proposal') statusEl.classList.add('status-proposal');
+            if (status && status.toLowerCase() === 'funded') statusEl.classList.add('status-funded');
             
             // Generate and display random skills
             generateProjectSkills();
             
-            // Generate and display team members
-            generateProjectTeam();
+            // Generate and display team members (use provided teamCount)
+            generateProjectTeam(teamCount);
         }
 
         function showProfilePreview() {
@@ -1290,7 +1328,7 @@
             });
         }
 
-        async function generateProjectTeam() {
+        async function generateProjectTeam(count = 1) {
             const container = document.getElementById('project-team-container');
             container.innerHTML = '';
             
@@ -1300,34 +1338,36 @@
                 const data = await response.json();
                 
                 if (data.success && data.collaborators && data.collaborators.length > 0) {
-                    // Pick one random collaborator
-                    const randomIndex = Math.floor(Math.random() * data.collaborators.length);
-                    const teamMember = data.collaborators[randomIndex];
-                    
-                    const memberDiv = document.createElement('div');
-                    memberDiv.className = 'project-team-member';
-                    
-                    // Create avatar
-                    let avatarContent;
-                    if (teamMember.image_data) {
-                        avatarContent = `<img src="${teamMember.image_data}" alt="${teamMember.name}">`;
-                    } else {
-                        avatarContent = `<span>${teamMember.name.charAt(0).toUpperCase()}</span>`;
-                    }
-                    
-                    const animals = teamMember.skills.map(s => s.animal).join(', ');
-                    
-                    memberDiv.innerHTML = `
-                        <div class="team-member-avatar">
-                            ${avatarContent}
-                        </div>
-                        <div class="team-member-info">
-                            <div class="team-member-name">${teamMember.name}</div>
-                            <div class="team-member-skills">${animals}</div>
-                        </div>
-                    `;
-                    
-                    container.appendChild(memberDiv);
+                    // Shuffle collaborators and take up to 'count' of them
+                    const shuffled = [...data.collaborators].sort(() => 0.5 - Math.random());
+                    const members = shuffled.slice(0, Math.max(1, Math.min(count, shuffled.length)));
+
+                    members.forEach(teamMember => {
+                        const memberDiv = document.createElement('div');
+                        memberDiv.className = 'project-team-member';
+                        
+                        // Create avatar
+                        let avatarContent;
+                        if (teamMember.image_data) {
+                            avatarContent = `<img src="${teamMember.image_data}" alt="${teamMember.name}">`;
+                        } else {
+                            avatarContent = `<span>${teamMember.name.charAt(0).toUpperCase()}</span>`;
+                        }
+                        
+                        const animals = teamMember.skills.map(s => s.animal).join(', ');
+                        
+                        memberDiv.innerHTML = `
+                            <div class="team-member-avatar">
+                                ${avatarContent}
+                            </div>
+                            <div class="team-member-info">
+                                <div class="team-member-name">${teamMember.name}</div>
+                                <div class="team-member-skills">${animals}</div>
+                            </div>
+                        `;
+                        
+                        container.appendChild(memberDiv);
+                    });
                 } else {
                     container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">No team members available</p>';
                 }
