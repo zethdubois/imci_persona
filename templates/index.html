@@ -206,6 +206,7 @@
             font-weight: bold;
             margin-bottom: 30px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-align: left;
         }
         
         .radar-container {
@@ -305,9 +306,13 @@
         <!-- Preview Panel (Right) -->
         <div class="preview-panel">
             <div class="profile-preview">
-                <div class="profile-image" id="profile-image">
+                <div class="profile-image" id="profile-image" onclick="document.getElementById('image-upload').click()">
                     <span id="profile-avatar">👤</span>
+                    <div class="profile-image-overlay">
+                        <div class="image-upload-text">Click to upload image</div>
+                    </div>
                 </div>
+                <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 <div class="profile-name" id="profile-name">Your Name</div>
                 
                 <div class="radar-container">
@@ -340,12 +345,39 @@
             // Update profile name
             document.getElementById('profile-name').textContent = name || 'Your Name';
             
-            // Update avatar with first letter or emoji
+            // Update avatar with first letter or emoji (only if no image is uploaded)
             const avatar = document.getElementById('profile-avatar');
-            if (name) {
+            const profileImage = document.getElementById('profile-image');
+            if (!profileImage.querySelector('img') && name) {
                 avatar.textContent = name.charAt(0).toUpperCase();
-            } else {
+            } else if (!profileImage.querySelector('img')) {
                 avatar.textContent = '👤';
+            }
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const profileImage = document.getElementById('profile-image');
+                    const avatar = document.getElementById('profile-avatar');
+                    
+                    // Create image element
+                    const img = document.createElement('img');
+                    img.src = e.target.result;
+                    
+                    // Clear existing content and add image
+                    profileImage.innerHTML = '';
+                    profileImage.appendChild(img);
+                    
+                    // Add overlay back
+                    const overlay = document.createElement('div');
+                    overlay.className = 'profile-image-overlay';
+                    overlay.innerHTML = '<div class="image-upload-text">Click to change image</div>';
+                    profileImage.appendChild(overlay);
+                };
+                reader.readAsDataURL(file);
             }
         }
 
