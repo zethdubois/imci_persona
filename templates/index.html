@@ -28,9 +28,147 @@
             width: 400px;
             background: rgba(255, 255, 255, 0.1);
             backdrop-filter: blur(10px);
-            padding: 30px;
+            padding: 0;
             overflow-y: auto;
             border-right: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .tab-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+        
+        .tab-header {
+            display: flex;
+            background: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .tab-button {
+            flex: 1;
+            padding: 15px 10px;
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+            border-bottom: 2px solid transparent;
+        }
+        
+        .tab-button:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+        
+        .tab-button.active {
+            color: white;
+            border-bottom-color: #4CAF50;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .tab-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+        
+        .tab-panel {
+            display: none;
+        }
+        
+        .tab-panel.active {
+            display: block;
+        }
+        
+        .collaborator-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .collaborator-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+        
+        .collaborator-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .collaborator-avatar {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+            background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            overflow: hidden;
+        }
+        
+        .collaborator-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        
+        .collaborator-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .collaborator-animals {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+        
+        .projects-list {
+            margin-top: 20px;
+        }
+        
+        .project-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .project-card:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+        }
+        
+        .project-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .project-description {
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 10px;
+        }
+        
+        .project-collaborators {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.6);
         }
         
         .preview-panel {
@@ -275,30 +413,65 @@
     <div class="app-container">
         <!-- Config Panel (Left) -->
         <div class="config-panel">
-            <h1>🎯 Config Panel</h1>
-            
-            <div id="name-section">
-                <div class="form-group">
-                    <label for="name">What is your name?</label>
-                    <input type="text" id="name" placeholder="Enter your name" oninput="updatePreview()">
+            <div class="tab-container">
+                <div class="tab-header">
+                    <button class="tab-button active" onclick="switchTab('new-collaborator')">New Collaborator</button>
+                    <button class="tab-button" onclick="switchTab('collaborators')">Collaborators</button>
+                    <button class="tab-button" onclick="switchTab('projects')">Projects</button>
                 </div>
-                <button class="btn" onclick="startSurvey()">Start Survey</button>
-            </div>
-
-            <div id="survey-section" class="hidden">
-                <div id="message-area"></div>
                 
-                <div id="existing-profile-choice" class="existing-profile-choice hidden">
-                    <p>Found existing profile! What would you like to do?</p>
-                    <button class="btn btn-secondary" onclick="loadExistingProfile()">View Existing Profile</button>
-                    <button class="btn" onclick="createNewProfile()">Create New Profile</button>
-                </div>
+                <div class="tab-content">
+                    <!-- New Collaborator Tab -->
+                    <div id="new-collaborator" class="tab-panel active">
+                        <h1>🎯 New Collaborator</h1>
+                        
+                        <div id="name-section">
+                            <div class="form-group">
+                                <label for="name">What is your name?</label>
+                                <input type="text" id="name" placeholder="Enter your name" oninput="updatePreview()">
+                            </div>
+                            <button class="btn" onclick="startSurvey()">Start Survey</button>
+                        </div>
 
-                <div id="ratings-container"></div>
-                
-                <div class="action-buttons">
-                    <button class="btn" onclick="saveProfile()">Save Profile</button>
-                    <button class="btn btn-secondary" onclick="resetSurvey()">Reset</button>
+                        <div id="survey-section" class="hidden">
+                            <div id="message-area"></div>
+                            
+                            <div id="existing-profile-choice" class="existing-profile-choice hidden">
+                                <p>Found existing profile! What would you like to do?</p>
+                                <button class="btn btn-secondary" onclick="loadExistingProfile()">View Existing Profile</button>
+                                <button class="btn" onclick="createNewProfile()">Create New Profile</button>
+                            </div>
+
+                            <div id="ratings-container"></div>
+                            
+                            <div class="action-buttons">
+                                <button class="btn" onclick="saveProfile()">Save Profile</button>
+                                <button class="btn btn-secondary" onclick="resetSurvey()">Reset</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Collaborators Tab -->
+                    <div id="collaborators" class="tab-panel">
+                        <h1>👥 Collaborators</h1>
+                        <p>Saved profiles directory</p>
+                        <div id="collaborators-grid" class="collaborator-grid">
+                            <!-- Collaborator cards will be loaded here -->
+                        </div>
+                    </div>
+                    
+                    <!-- Projects Tab -->
+                    <div id="projects" class="tab-panel">
+                        <h1>📁 Projects</h1>
+                        <p>Manage team projects</p>
+                        <div class="projects-list">
+                            <div class="project-card">
+                                <div class="project-title">Sample Project</div>
+                                <div class="project-description">This is a sample project for demonstration purposes.</div>
+                                <div class="project-collaborators">Team members: Click on Collaborators tab to view</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -586,6 +759,113 @@
             return shuffled.slice(0, count);
         }
 
+        function switchTab(tabName) {
+            // Remove active class from all tabs and buttons
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+            
+            // Add active class to selected tab and button
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            // Load collaborators when switching to collaborators tab
+            if (tabName === 'collaborators') {
+                loadCollaborators();
+            }
+        }
+
+        async function loadCollaborators() {
+            try {
+                const response = await fetch('/get_collaborators');
+                const data = await response.json();
+                
+                const grid = document.getElementById('collaborators-grid');
+                grid.innerHTML = '';
+                
+                if (data.collaborators && data.collaborators.length > 0) {
+                    data.collaborators.forEach(collaborator => {
+                        const card = document.createElement('div');
+                        card.className = 'collaborator-card';
+                        card.onclick = () => loadCollaboratorProfile(collaborator.name);
+                        
+                        const animals = collaborator.skills.map(s => s.animal).join(', ');
+                        
+                        card.innerHTML = `
+                            <div class="collaborator-avatar">
+                                <span>${collaborator.name.charAt(0).toUpperCase()}</span>
+                            </div>
+                            <div class="collaborator-name">${collaborator.name}</div>
+                            <div class="collaborator-animals">${animals}</div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    });
+                } else {
+                    grid.innerHTML = '<p style="text-align: center; color: rgba(255,255,255,0.6);">No collaborators saved yet</p>';
+                }
+                
+            } catch (error) {
+                console.error('Error loading collaborators:', error);
+            }
+        }
+
+        async function loadCollaboratorProfile(name) {
+            try {
+                const response = await fetch('/load_profile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({name: name})
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Switch to new collaborator tab
+                    document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+                    document.querySelectorAll('.tab-panel').forEach(panel => panel.classList.remove('active'));
+                    document.querySelector('.tab-button').classList.add('active');
+                    document.getElementById('new-collaborator').classList.add('active');
+                    
+                    // Load the profile
+                    currentName = name;
+                    skillsData = data.skills;
+                    interestsData = data.interests;
+                    
+                    // Update UI
+                    document.getElementById('name').value = name;
+                    document.getElementById('name-section').classList.add('hidden');
+                    document.getElementById('survey-section').classList.remove('hidden');
+                    document.getElementById('existing-profile-choice').classList.add('hidden');
+                    
+                    // Create rating form and set values
+                    currentAnimals = skillsData.map(item => item.animal);
+                    createRatingForm();
+                    
+                    // Set button states
+                    skillsData.forEach(item => {
+                        const skillBtn = document.querySelector(`button[onclick*="skill"][onclick*="${item.animal}"][onclick*="${item.skill}"]`);
+                        if (skillBtn) skillBtn.classList.add('selected');
+                    });
+                    
+                    interestsData.forEach(item => {
+                        const interestBtn = document.querySelector(`button[onclick*="interest"][onclick*="${item.animal}"][onclick*="${item.interest}"]`);
+                        if (interestBtn) interestBtn.classList.add('selected');
+                    });
+                    
+                    // Update preview
+                    updatePreview();
+                    updateLiveRadar();
+                    
+                    showMessage(`Loaded profile for ${name}`, 'success');
+                } else {
+                    showMessage('Profile not found', 'error');
+                }
+
+            } catch (error) {
+                showMessage('Error loading profile', 'error');
+            }
+        }
+
         function resetSurvey() {
             currentName = '';
             currentAnimals = [];
@@ -597,6 +877,10 @@
             document.getElementById('survey-section').classList.add('hidden');
             document.getElementById('existing-profile-choice').classList.add('hidden');
             document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
+            
+            // Reset profile image
+            const profileImage = document.getElementById('profile-image');
+            profileImage.innerHTML = '<span id="profile-avatar">👤</span><div class="profile-image-overlay"><div class="image-upload-text">Click to upload image</div></div>';
             
             updatePreview();
         }
