@@ -540,6 +540,42 @@
             font-size: 0.9em;
             color: rgba(255, 255, 255, 0.7);
         }
+        
+        .tags-input {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            min-height: 60px;
+            resize: vertical;
+        }
+        
+        .tags-input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+        
+        .profile-tags {
+            margin-top: 20px;
+        }
+        
+        .tags-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .tag {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -562,6 +598,10 @@
                             <div class="form-group">
                                 <label for="name">What is your name?</label>
                                 <input type="text" id="name" placeholder="Enter your name" oninput="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label for="tags">Tags (comma-separated)</label>
+                                <textarea id="tags" class="tags-input" placeholder="Enter tags separated by commas (e.g., developer, creative, leader)" oninput="updatePreview()"></textarea>
                             </div>
                             <button class="btn" onclick="startSurvey()">Start Survey</button>
                         </div>
@@ -625,6 +665,10 @@
                 </div>
                 <input type="file" id="image-upload" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
                 <div class="profile-name" id="profile-name">Your Name</div>
+                
+                <div class="profile-tags">
+                    <div class="tags-container" id="profile-tags-container"></div>
+                </div>
 
                 <div class="radar-container">
                     <div id="radar-display" class="placeholder-radar">
@@ -658,6 +702,7 @@
         let skillsData = [];
         let interestsData = [];
         let currentProfileImage = null;
+        let currentTags = [];
 
         function showMessage(message, type = 'info') {
             const messageArea = document.getElementById('message-area');
@@ -673,6 +718,26 @@
             
             // Update profile name
             document.getElementById('profile-name').textContent = name || 'Your Name';
+            
+            // Update tags
+            const tagsInput = document.getElementById('tags');
+            const tagsValue = tagsInput.value.trim();
+            
+            // Parse tags and update display
+            const tagsContainer = document.getElementById('profile-tags-container');
+            tagsContainer.innerHTML = '';
+            
+            if (tagsValue) {
+                currentTags = tagsValue.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+                currentTags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag';
+                    tagElement.textContent = tag;
+                    tagsContainer.appendChild(tagElement);
+                });
+            } else {
+                currentTags = [];
+            }
             
             // Update avatar with first letter or emoji (only if no image is uploaded)
             const profileImage = document.getElementById('profile-image');
@@ -784,6 +849,8 @@
                 `;
                 container.appendChild(animalDiv);
             });
+            // Render initial radar with placeholders (zeros) so all axes are visible
+            updateLiveRadar();
         }
 
         function setRating(type, animal, rating, button) {
@@ -810,30 +877,47 @@
                 }
             }
 
-            // Update live preview
+            // Always update live preview (use placeholders for missing values)
             updateLiveRadar();
         }
 
         async function updateLiveRadar() {
-            if (skillsData.length === 0 || interestsData.length === 0) {
-                return;
-            }
+            // If we don't yet have animals to show, skip
+            if (!currentAnimals || currentAnimals.length === 0) return;
+
+            // Build complete arrays for all animals, filling missing values with 0
+            const completeSkills = currentAnimals.map(animal => {
+                const found = skillsData.find(s => s.animal === animal);
+                return { animal, skill: (found && typeof found.skill === 'number') ? found.skill : 0 };
+            });
+
+            const completeInterests = currentAnimals.map(animal => {
+                const found = interestsData.find(i => i.animal === animal);
+                return { animal, interest: (found && typeof found.interest === 'number') ? found.interest : 0 };
+            });
 
             try {
                 const response = await fetch('/generate_chart', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({
-                        skills: skillsData,
-                        interests: interestsData
+                        skills: completeSkills,
+                        interests: completeInterests
                     })
                 });
+
+                if (!response.ok) {
+                    console.error('Server error:', response.status);
+                    return;
+                }
 
                 const data = await response.json();
 
                 if (data.success) {
                     const radarDisplay = document.getElementById('radar-display');
                     radarDisplay.innerHTML = `<img src="data:image/png;base64,${data.chart_data}" alt="Live Radar Chart">`;
+                } else {
+                    console.error('Chart generation failed:', data.error);
                 }
 
             } catch (error) {
@@ -852,9 +936,11 @@
                     name: currentName,
                     skills: skillsData,
                     interests: interestsData,
-                    image_data: currentProfileImage
+                    image_data: currentProfileImage,
+                    tags: currentTags
                 };
                 console.log('Saving profile with image data:', currentProfileImage ? currentProfileImage.substring(0, 50) + '...' : 'null');
+                console.log('Saving tags:', currentTags);
                 
                 const response = await fetch('/submit_survey', {
                     method: 'POST',
@@ -888,6 +974,8 @@
                 if (data.success) {
                     skillsData = data.skills;
                     interestsData = data.interests;
+                    currentTags = data.tags || [];
+                    document.getElementById('tags').value = currentTags.join(', ');
                     
                     // Update UI with loaded data
                     currentAnimals = skillsData.map(item => item.animal);
@@ -1013,6 +1101,10 @@
                     skillsData = data.skills;
                     interestsData = data.interests;
                     
+                    // Load tags
+                    currentTags = data.tags || [];
+                    document.getElementById('tags').value = currentTags.join(', ');
+                    
                     // Load image if available
                     const profileImage = document.getElementById('profile-image');
                     if (data.image_data && data.image_data !== 'null' && data.image_data !== '') {
@@ -1073,12 +1165,17 @@
             skillsData = [];
             interestsData = [];
             currentProfileImage = null;
+            currentTags = [];
             
             document.getElementById('name').value = '';
+            document.getElementById('tags').value = '';
             document.getElementById('name-section').classList.remove('hidden');
             document.getElementById('survey-section').classList.add('hidden');
             document.getElementById('existing-profile-choice').classList.add('hidden');
             document.getElementById('radar-display').innerHTML = '<div class="placeholder-radar">Complete the survey to see your radar chart</div>';
+            
+            // Clear tags display
+            document.getElementById('profile-tags-container').innerHTML = '';
             
             // Reset profile image
             const profileImage = document.getElementById('profile-image');
@@ -1205,6 +1302,17 @@
                 container.innerHTML = '<p style="color: rgba(255,255,255,0.6);">Error loading team members</p>';
             }
         }
+
+        // Initialize the radar with placeholder data on first load so axes are visible
+        document.addEventListener('DOMContentLoaded', () => {
+            if (!currentAnimals || currentAnimals.length === 0) {
+                currentAnimals = get_random_animals(5);
+            }
+            skillsData = [];
+            interestsData = [];
+            console.log('Initializing live radar with animals:', currentAnimals);
+            updateLiveRadar();
+        });
     </script>
 </body>
 </html>

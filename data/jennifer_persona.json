@@ -1,0 +1,48 @@
+{
+  "name": "Jennifer",
+  "skills": [
+    {
+      "animal": "Wolf",
+      "skill": 2
+    },
+    {
+      "animal": "Eagle",
+      "skill": 4
+    },
+    {
+      "animal": "Fox",
+      "skill": 5
+    },
+    {
+      "animal": "Penguin",
+      "skill": 2
+    },
+    {
+      "animal": "Bear",
+      "skill": 1
+    }
+  ],
+  "interests": [
+    {
+      "animal": "Wolf",
+      "interest": 2
+    },
+    {
+      "animal": "Eagle",
+      "interest": 2
+    },
+    {
+      "animal": "Fox",
+      "interest": 3
+    },
+    {
+      "animal": "Penguin",
+      "interest": 1
+    },
+    {
+      "animal": "Bear",
+      "interest": 1
+    }
+  ],
+  "tags": []
+}

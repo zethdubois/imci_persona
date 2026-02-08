@@ -34,10 +34,10 @@ def get_profile_image_filename(name):
     return os.path.join(DATA_DIR, f"{safe_name}_profile.png")
 
 
-def save_profile_to_file(name, skills_data, interests_data, image_data=None):
+def save_profile_to_file(name, skills_data, interests_data, image_data=None, tags=None):
     """Save profile to JSON file in data directory"""
     filename = get_profile_filename(name)
-    profile_data = {"name": name, "skills": skills_data, "interests": interests_data}
+    profile_data = {"name": name, "skills": skills_data, "interests": interests_data, "tags": tags or []}
     with open(filename, "w") as f:
         json.dump(profile_data, f, indent=2)
 
@@ -113,78 +113,86 @@ def get_random_animals(count):
 
 
 def create_radar_chart(skills_data, interests_data, name):
-    # Create figure with polar subplot (doubled size)
-    fig, ax = plt.subplots(figsize=(20, 20), subplot_kw=dict(projection="polar"))
+    try:
+        # Create figure with polar subplot (doubled size)
+        fig, ax = plt.subplots(figsize=(20, 20), subplot_kw=dict(projection="polar"))
 
-    # Number of variables
-    categories = [item["animal"] for item in skills_data]
-    N = len(categories)
+        # Number of variables
+        categories = [item["animal"] for item in skills_data]
+        N = len(categories)
+        
+        if N == 0:
+            raise ValueError("No categories found in skills data")
 
-    # Angles for each axis
-    angles = [n / float(N) * 2 * np.pi for n in range(N)]
-    angles += angles[:1]  # Complete the loop
+        # Angles for each axis
+        angles = [n / float(N) * 2 * np.pi for n in range(N)]
+        angles += angles[:1]  # Complete the loop
 
-    # Skills values (1-5 scale)
-    skill_values = [item["skill"] for item in skills_data]
-    skill_values += skill_values[:1]  # Complete the loop
+        # Skills values (1-5 scale)
+        skill_values = [item["skill"] for item in skills_data]
+        skill_values += skill_values[:1]  # Complete the loop
 
-    # Interest values (1-3 scale, map to 1-5 for display)
-    interest_values = [
-        item["interest"] * (5 / 3) for item in interests_data
-    ]  # Map 1-3 to ~1.7-5
-    interest_values += interest_values[:1]  # Complete the loop
+        # Interest values (1-3 scale, map to 1-5 for display)
+        interest_values = [
+            item["interest"] * (5 / 3) for item in interests_data
+        ]  # Map 1-3 to ~1.7-5
+        interest_values += interest_values[:1]  # Complete the loop
 
-    # Plot skills (red)
-    ax.plot(
-        angles, skill_values, "o-", linewidth=3, color="red", alpha=0.7, label="Skills"
-    )
-    ax.fill(angles, skill_values, alpha=0.25, color="red")
+        # Plot skills (red)
+        ax.plot(
+            angles, skill_values, "o-", linewidth=3, color="red", alpha=0.7, label="Skills"
+        )
+        ax.fill(angles, skill_values, alpha=0.25, color="red")
 
-    # Plot interests (dashed green line)
-    ax.plot(
-        angles,
-        interest_values,
-        "s--",
-        linewidth=6,
-        color="green",
-        alpha=0.7,
-        label="Interests",
-    )
-    ax.fill(angles, interest_values, alpha=0.0, color="green")
+        # Plot interests (dashed green line)
+        ax.plot(
+            angles,
+            interest_values,
+            "s--",
+            linewidth=6,
+            color="green",
+            alpha=0.7,
+            label="Interests",
+        )
+        ax.fill(angles, interest_values, alpha=0.0, color="green")
 
-    # Add labels
-    ax.set_xticks(angles[:-1])
-    ax.set_xticklabels(categories, fontsize=24)
+        # Add labels
+        ax.set_xticks(angles[:-1])
+        ax.set_xticklabels(categories, fontsize=24)
 
-    # Set y-axis limits
-    ax.set_ylim(0, 5)
-    ax.set_yticks([1, 2, 3, 4, 5])
-    ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=20)
+        # Set y-axis limits
+        ax.set_ylim(0, 5)
+        ax.set_yticks([1, 2, 3, 4, 5])
+        ax.set_yticklabels(["1", "2", "3", "4", "5"], fontsize=20)
 
-    # Add grid
-    ax.grid(True, alpha=0.3)
+        # Add grid
+        ax.grid(True, alpha=0.3)
 
-    # Add legend
-    ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=24)
+        # Add legend
+        ax.legend(loc="upper right", bbox_to_anchor=(1.3, 1.1), fontsize=24)
 
-    # Title
-    plt.title(
-        f"Skills vs Interests Radar Chart",
-        size=32,
-        weight="bold",
-        pad=40,
-    )
+        # Title
+        plt.title(
+            f"Skills vs Interests Radar Chart",
+            size=32,
+            weight="bold",
+            pad=40,
+        )
 
-    plt.tight_layout()
+        plt.tight_layout()
 
-    # Convert to base64 string for web display
-    img_buffer = io.BytesIO()
-    plt.savefig(img_buffer, format="png", dpi=300, bbox_inches="tight")
-    img_buffer.seek(0)
-    img_str = base64.b64encode(img_buffer.read()).decode()
-    plt.close()
+        # Convert to base64 string for web display
+        img_buffer = io.BytesIO()
+        plt.savefig(img_buffer, format="png", dpi=300, bbox_inches="tight")
+        img_buffer.seek(0)
+        img_str = base64.b64encode(img_buffer.read()).decode()
+        plt.close()
 
-    return img_str
+        return img_str
+    except Exception as e:
+        print(f"Error creating radar chart: {e}")
+        plt.close()  # Make sure to close the plot even if there's an error
+        raise e
 
 
 @app.route("/")
@@ -229,7 +237,8 @@ def submit_survey():
         return jsonify({"error": "Missing required data"}), 400
 
     # Save profile to file (with image if provided)
-    filename = save_profile_to_file(name, skills_data, interests_data, image_data)
+    tags_data = data.get("tags", [])
+    filename = save_profile_to_file(name, skills_data, interests_data, image_data, tags_data)
 
     # Create radar chart
     chart_data = create_radar_chart(skills_data, interests_data, name)
@@ -246,16 +255,27 @@ def submit_survey():
 
 @app.route("/generate_chart", methods=["POST"])
 def generate_chart():
-    skills_data = request.json.get("skills", [])
-    interests_data = request.json.get("interests", [])
+    try:
+        skills_data = request.json.get("skills", [])
+        interests_data = request.json.get("interests", [])
 
-    if not skills_data or not interests_data:
-        return jsonify({"error": "Missing data"}), 400
+        if not skills_data or not interests_data:
+            return jsonify({"error": "Missing data"}), 400
 
-    # Create radar chart
-    chart_data = create_radar_chart(skills_data, interests_data, "Live Preview")
+        # Additional validation
+        if not all(isinstance(skill, dict) and "animal" in skill and "skill" in skill for skill in skills_data):
+            return jsonify({"error": "Invalid skills data format"}), 400
+            
+        if not all(isinstance(interest, dict) and "animal" in interest and "interest" in interest for interest in interests_data):
+            return jsonify({"error": "Invalid interests data format"}), 400
 
-    return jsonify({"success": True, "chart_data": chart_data})
+        # Create radar chart
+        chart_data = create_radar_chart(skills_data, interests_data, "Live Preview")
+
+        return jsonify({"success": True, "chart_data": chart_data})
+    except Exception as e:
+        print(f"Error in generate_chart: {e}")
+        return jsonify({"error": f"Chart generation failed: {str(e)}"}), 500
 
 
 @app.route("/get_collaborators", methods=["GET"])
