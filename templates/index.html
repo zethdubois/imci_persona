@@ -781,6 +781,9 @@
             const nameInput = document.getElementById('name');
             const name = nameInput.value.trim();
             
+            // Keep currentName in sync with the input so saves use it
+            currentName = name;
+            
             // Update profile name
             document.getElementById('profile-name').textContent = name || 'Your Name';
             
@@ -999,8 +1002,15 @@
         }
 
         async function saveProfile() {
+            // Ensure name is present
+            currentName = document.getElementById('name').value.trim();
+            if (!currentName) {
+                showMessage('Please enter a name before saving', 'error');
+                return;
+            }
+
             if (skillsData.length !== currentAnimals.length || interestsData.length !== currentAnimals.length) {
-                showMessage('Please rate all skills and interests', 'error');
+                showMessage('Please rate all skills and interests before saving', 'error');
                 return;
             }
 
@@ -1014,12 +1024,20 @@
                 };
                 console.log('Saving profile with image data:', currentProfileImage ? currentProfileImage.substring(0, 50) + '...' : 'null');
                 console.log('Saving tags:', currentTags);
+                console.log('Saving payload:', profileData);
                 
                 const response = await fetch('/submit_survey', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify(profileData)
                 });
+
+                if (!response.ok) {
+                    const err = await response.json().catch(() => ({}));
+                    console.error('Server returned error', response.status, err);
+                    showMessage(err.error || 'Error saving profile', 'error');
+                    return;
+                }
 
                 const data = await response.json();
 
@@ -1030,6 +1048,7 @@
                 }
 
             } catch (error) {
+                console.error('Save failed:', error);
                 showMessage('Error saving profile', 'error');
             }
         }

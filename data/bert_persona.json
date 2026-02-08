@@ -2,45 +2,45 @@
   "name": "Bert",
   "skills": [
     {
-      "animal": "Fox",
+      "animal": "lion",
       "skill": 2
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "skill": 3
     },
     {
-      "animal": "Lion",
+      "animal": "eagle",
       "skill": 1
     },
     {
-      "animal": "Wolf",
+      "animal": "penguin",
       "skill": 5
     },
     {
-      "animal": "Elephant",
+      "animal": "wolf",
       "skill": 2
     }
   ],
   "interests": [
     {
-      "animal": "Fox",
+      "animal": "lion",
       "interest": 1
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "interest": 2
     },
     {
-      "animal": "Lion",
+      "animal": "eagle",
       "interest": 1
     },
     {
-      "animal": "Wolf",
+      "animal": "penguin",
       "interest": 2
     },
     {
-      "animal": "Elephant",
+      "animal": "wolf",
       "interest": 3
     }
   ],

@@ -2,45 +2,45 @@
   "name": "Jennifer",
   "skills": [
     {
-      "animal": "Wolf",
+      "animal": "lion",
       "skill": 2
     },
     {
-      "animal": "Eagle",
+      "animal": "dolfin",
       "skill": 4
     },
     {
-      "animal": "Fox",
+      "animal": "eagle",
       "skill": 5
     },
     {
-      "animal": "Penguin",
+      "animal": "penguin",
       "skill": 2
     },
     {
-      "animal": "Bear",
+      "animal": "wolf",
       "skill": 1
     }
   ],
   "interests": [
     {
-      "animal": "Wolf",
+      "animal": "lion",
       "interest": 2
     },
     {
-      "animal": "Eagle",
+      "animal": "dolfin",
       "interest": 2
     },
     {
-      "animal": "Fox",
+      "animal": "eagle",
       "interest": 3
     },
     {
-      "animal": "Penguin",
+      "animal": "penguin",
       "interest": 1
     },
     {
-      "animal": "Bear",
+      "animal": "wolf",
       "interest": 1
     }
   ],

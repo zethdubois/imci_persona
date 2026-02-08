@@ -2,45 +2,45 @@
   "name": "Dick",
   "skills": [
     {
-      "animal": "Dolphin",
+      "animal": "lion",
       "skill": 5
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "skill": 5
     },
     {
-      "animal": "Wolf",
+      "animal": "eagle",
       "skill": 5
     },
     {
-      "animal": "Eagle",
+      "animal": "penguin",
       "skill": 5
     },
     {
-      "animal": "Giraffe",
+      "animal": "wolf",
       "skill": 5
     }
   ],
   "interests": [
     {
-      "animal": "Dolphin",
+      "animal": "lion",
       "interest": 3
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "interest": 3
     },
     {
-      "animal": "Wolf",
+      "animal": "eagle",
       "interest": 3
     },
     {
-      "animal": "Eagle",
+      "animal": "penguin",
       "interest": 3
     },
     {
-      "animal": "Giraffe",
+      "animal": "wolf",
       "interest": 3
     }
   ],

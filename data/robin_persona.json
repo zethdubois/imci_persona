@@ -2,45 +2,45 @@
   "name": "Robin",
   "skills": [
     {
-      "animal": "Wolf",
+      "animal": "lion",
       "skill": 5
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "skill": 3
     },
     {
-      "animal": "Giraffe",
+      "animal": "eagle",
       "skill": 2
     },
     {
-      "animal": "Lion",
+      "animal": "penguin",
       "skill": 1
     },
     {
-      "animal": "Eagle",
+      "animal": "wolf",
       "skill": 2
     }
   ],
   "interests": [
     {
-      "animal": "Wolf",
+      "animal": "lion",
       "interest": 2
     },
     {
-      "animal": "Penguin",
+      "animal": "dolfin",
       "interest": 1
     },
     {
-      "animal": "Giraffe",
+      "animal": "eagle",
       "interest": 2
     },
     {
-      "animal": "Lion",
+      "animal": "penguin",
       "interest": 1
     },
     {
-      "animal": "Eagle",
+      "animal": "wolf",
       "interest": 1
     }
   ],

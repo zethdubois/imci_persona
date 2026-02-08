@@ -2,45 +2,45 @@
   "name": "Marty",
   "skills": [
     {
-      "animal": "Giraffe",
+      "animal": "lion",
+      "skill": 3
+    },
+    {
+      "animal": "dolfin",
+      "skill": 2
+    },
+    {
+      "animal": "eagle",
       "skill": 5
     },
     {
-      "animal": "Lion",
-      "skill": 5
+      "animal": "penguin",
+      "skill": 4
     },
     {
-      "animal": "Dolphin",
-      "skill": 5
-    },
-    {
-      "animal": "Eagle",
-      "skill": 5
-    },
-    {
-      "animal": "Penguin",
+      "animal": "wolf",
       "skill": 5
     }
   ],
   "interests": [
     {
-      "animal": "Giraffe",
+      "animal": "lion",
       "interest": 1
     },
     {
-      "animal": "Lion",
+      "animal": "dolfin",
       "interest": 1
     },
     {
-      "animal": "Dolphin",
+      "animal": "eagle",
       "interest": 1
     },
     {
-      "animal": "Eagle",
+      "animal": "penguin",
       "interest": 1
     },
     {
-      "animal": "Penguin",
+      "animal": "wolf",
       "interest": 1
     }
   ],
